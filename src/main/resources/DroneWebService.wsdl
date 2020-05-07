@@ -1,0 +1,70 @@
+<wsdl:definitions xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+                  xmlns:tns="http://www.polytech.unice.fr/si/4a/isa/dd/droneService"
+                  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:ns1="http://schemas.xmlsoap.org/soap/http"
+                  name="DroneWebServiceService"
+                  targetNamespace="http://www.polytech.unice.fr/si/4a/isa/dd/droneService">
+    <wsdl:types>
+        <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+                   xmlns:tns="http://www.polytech.unice.fr/si/4a/isa/dd/droneService" attributeFormDefault="unqualified"
+                   elementFormDefault="unqualified"
+                   targetNamespace="http://www.polytech.unice.fr/si/4a/isa/dd/droneService">
+            <xs:element name="register" type="tns:register"/>
+            <xs:element name="registerResponse" type="tns:registerResponse"/>
+            <xs:complexType name="register">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="drone_id" type="xs:string"/>
+                    <xs:element minOccurs="0" name="date" type="xs:string"/>
+                    <xs:element minOccurs="0" name="hour" type="xs:string"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="registerResponse">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="return" type="xs:boolean"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:element name="ParseException" type="tns:ParseException"/>
+            <xs:complexType name="ParseException">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="errorOffset" type="xs:int"/>
+                    <xs:element minOccurs="0" name="message" type="xs:string"/>
+                </xs:sequence>
+            </xs:complexType>
+        </xs:schema>
+    </wsdl:types>
+    <wsdl:message name="ParseException">
+        <wsdl:part element="tns:ParseException" name="ParseException"></wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="register">
+        <wsdl:part element="tns:register" name="parameters"></wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="registerResponse">
+        <wsdl:part element="tns:registerResponse" name="parameters"></wsdl:part>
+    </wsdl:message>
+    <wsdl:portType name="DroneWebService">
+        <wsdl:operation name="register">
+            <wsdl:input message="tns:register" name="register"></wsdl:input>
+            <wsdl:output message="tns:registerResponse" name="registerResponse"></wsdl:output>
+            <wsdl:fault message="tns:ParseException" name="ParseException"></wsdl:fault>
+        </wsdl:operation>
+    </wsdl:portType>
+    <wsdl:binding name="DroneWebServiceServiceSoapBinding" type="tns:DroneWebService">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="register">
+            <soap:operation soapAction="" style="document"/>
+            <wsdl:input name="register">
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output name="registerResponse">
+                <soap:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="ParseException">
+                <soap:fault name="ParseException" use="literal"/>
+            </wsdl:fault>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="DroneWebServiceService">
+        <wsdl:port binding="tns:DroneWebServiceServiceSoapBinding" name="DroneWebServicePort">
+            <soap:address location="http://localhost:8080/DroneManagementComponent/webservices/DroneWS"/>
+        </wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>
