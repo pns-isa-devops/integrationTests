@@ -1,9 +1,6 @@
 package cliDemo;
 
-
 import api.DDPublicAPI;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import stubs.billing.BillingWebService;
@@ -227,7 +224,7 @@ public class ScenarioCLI1Test {
 
     private static void initialize() {
         String host = "localhost";
-        String port = "80";
+        String port = "8000";
         initCWS(host, port);
         initPWS(host, port);
         initPackWS(host, port);
