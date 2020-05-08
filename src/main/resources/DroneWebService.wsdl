@@ -8,8 +8,41 @@
                    xmlns:tns="http://www.polytech.unice.fr/si/4a/isa/dd/droneService" attributeFormDefault="unqualified"
                    elementFormDefault="unqualified"
                    targetNamespace="http://www.polytech.unice.fr/si/4a/isa/dd/droneService">
+            <xs:element name="changeStatus" type="tns:changeStatus"/>
+            <xs:element name="changeStatusResponse" type="tns:changeStatusResponse"/>
+            <xs:element name="deleteAll" type="tns:deleteAll"/>
+            <xs:element name="deleteAllResponse" type="tns:deleteAllResponse"/>
             <xs:element name="register" type="tns:register"/>
             <xs:element name="registerResponse" type="tns:registerResponse"/>
+            <xs:complexType name="deleteAll">
+                <xs:sequence/>
+            </xs:complexType>
+            <xs:complexType name="deleteAllResponse">
+                <xs:sequence>
+                    <xs:element name="delete_all" type="xs:boolean"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="changeStatus">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="status" type="tns:droneSTATES"/>
+                    <xs:element minOccurs="0" name="drone" type="tns:drone"/>
+                    <xs:element minOccurs="0" name="date" type="xs:string"/>
+                    <xs:element minOccurs="0" name="hour" type="xs:string"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="drone">
+                <xs:sequence>
+                    <xs:element name="batteryLife" type="xs:int"/>
+                    <xs:element minOccurs="0" name="droneId" type="xs:string"/>
+                    <xs:element name="flightHours" type="xs:int"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="droneStatus">
+                <xs:sequence/>
+            </xs:complexType>
+            <xs:complexType name="changeStatusResponse">
+                <xs:sequence/>
+            </xs:complexType>
             <xs:complexType name="register">
                 <xs:sequence>
                     <xs:element minOccurs="0" name="drone_id" type="xs:string"/>
@@ -22,6 +55,18 @@
                     <xs:element minOccurs="0" name="return" type="xs:boolean"/>
                 </xs:sequence>
             </xs:complexType>
+            <xs:simpleType name="droneSTATES">
+                <xs:restriction base="xs:string">
+                    <xs:enumeration value="AVAILABLE"/>
+                    <xs:enumeration value="AWAITING_DELIVER"/>
+                    <xs:enumeration value="IN_DELIVERING"/>
+                    <xs:enumeration value="AWAITING_LOADING"/>
+                    <xs:enumeration value="IN_LOADING"/>
+                    <xs:enumeration value="AWAITING_TO_BE_AVAILABLE"/>
+                    <xs:enumeration value="AWAITING_REPAIR"/>
+                    <xs:enumeration value="BEING_REPAIRED"/>
+                </xs:restriction>
+            </xs:simpleType>
             <xs:element name="ParseException" type="tns:ParseException"/>
             <xs:complexType name="ParseException">
                 <xs:sequence>
@@ -31,8 +76,20 @@
             </xs:complexType>
         </xs:schema>
     </wsdl:types>
+    <wsdl:message name="changeStatusResponse">
+        <wsdl:part element="tns:changeStatusResponse" name="parameters"></wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="deleteAll">
+        <wsdl:part element="tns:deleteAll" name="parameters"></wsdl:part>
+    </wsdl:message>
     <wsdl:message name="ParseException">
         <wsdl:part element="tns:ParseException" name="ParseException"></wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="changeStatus">
+        <wsdl:part element="tns:changeStatus" name="parameters"></wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="deleteAllResponse">
+        <wsdl:part element="tns:deleteAllResponse" name="parameters"></wsdl:part>
     </wsdl:message>
     <wsdl:message name="register">
         <wsdl:part element="tns:register" name="parameters"></wsdl:part>
@@ -41,6 +98,15 @@
         <wsdl:part element="tns:registerResponse" name="parameters"></wsdl:part>
     </wsdl:message>
     <wsdl:portType name="DroneWebService">
+        <wsdl:operation name="deleteAll">
+            <wsdl:input message="tns:deleteAll" name="deleteAll"></wsdl:input>
+            <wsdl:output message="tns:deleteAllResponse" name="deleteAllResponse"></wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="changeStatus">
+            <wsdl:input message="tns:changeStatus" name="changeStatus"></wsdl:input>
+            <wsdl:output message="tns:changeStatusResponse" name="changeStatusResponse"></wsdl:output>
+            <wsdl:fault message="tns:ParseException" name="ParseException"></wsdl:fault>
+        </wsdl:operation>
         <wsdl:operation name="register">
             <wsdl:input message="tns:register" name="register"></wsdl:input>
             <wsdl:output message="tns:registerResponse" name="registerResponse"></wsdl:output>
@@ -49,6 +115,27 @@
     </wsdl:portType>
     <wsdl:binding name="DroneWebServiceServiceSoapBinding" type="tns:DroneWebService">
         <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="deleteAll">
+            <soap:operation soapAction="" style="document"/>
+            <wsdl:input name="deleteAll">
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output name="deleteAllResponse">
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="changeStatus">
+            <soap:operation soapAction="" style="document"/>
+            <wsdl:input name="changeStatus">
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output name="changeStatusResponse">
+                <soap:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="ParseException">
+                <soap:fault name="ParseException" use="literal"/>
+            </wsdl:fault>
+        </wsdl:operation>
         <wsdl:operation name="register">
             <soap:operation soapAction="" style="document"/>
             <wsdl:input name="register">
@@ -62,6 +149,7 @@
             </wsdl:fault>
         </wsdl:operation>
     </wsdl:binding>
+
     <wsdl:service name="DroneWebServiceService">
         <wsdl:port binding="tns:DroneWebServiceServiceSoapBinding" name="DroneWebServicePort">
             <soap:address location="http://localhost:8080/DroneManagementComponent/webservices/DroneWS"/>

@@ -1,7 +1,6 @@
 <wsdl:definitions xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
                   xmlns:tns="http://www.polytech.unice.fr/si/4a/isa/dd/packageService"
-                  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
-                  xmlns:ns2="http://schemas.xmlsoap.org/soap/http"
+                  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:ns2="http://schemas.xmlsoap.org/soap/http"
                   xmlns:ns1="http://www.polytech.unice.fr/si/4a/isa/dd/providerService"
                   name="PackageRegisterWebServiceService"
                   targetNamespace="http://www.polytech.unice.fr/si/4a/isa/dd/packageService">
@@ -10,6 +9,8 @@
                    xmlns:tns="http://www.polytech.unice.fr/si/4a/isa/dd/packageService"
                    attributeFormDefault="unqualified" elementFormDefault="unqualified"
                    targetNamespace="http://www.polytech.unice.fr/si/4a/isa/dd/packageService">
+            <xs:element name="deleteAll" type="tns:deleteAll"/>
+            <xs:element name="deleteAllResponse" type="tns:deleteAllResponse"/>
             <xs:element name="findPackage" type="tns:findPackage"/>
             <xs:element name="findPackageResponse" type="tns:findPackageResponse"/>
             <xs:element name="findProvider" type="tns:findProvider"/>
@@ -53,18 +54,20 @@
                     <xs:element maxOccurs="unbounded" minOccurs="0" name="deliveries" nillable="true"
                                 type="tns:delivery"/>
                     <xs:element name="id" type="xs:int"/>
-                    <xs:element name="idBill" type="xs:long"/>
+                    <xs:element name="idBill" type="xs:int"/>
                     <xs:element minOccurs="0" name="paymentDate" type="tns:dateTime"/>
                     <xs:element minOccurs="0" name="provider" type="tns:provider"/>
                 </xs:sequence>
             </xs:complexType>
             <xs:complexType name="delivery">
                 <xs:sequence>
+                    <xs:element minOccurs="0" name="bill" type="tns:bill"/>
                     <xs:element minOccurs="0" name="customer" type="tns:customer"/>
                     <xs:element name="customerMark" type="xs:int"/>
                     <xs:element name="deliveryBeginTimeInSeconds" type="xs:int"/>
                     <xs:element minOccurs="0" name="deliveryDate" type="xs:string"/>
                     <xs:element name="deliveryEndTimeInSeconds" type="xs:int"/>
+                    <xs:element minOccurs="0" name="drone" type="tns:drone"/>
                     <xs:element name="id" type="xs:int"/>
                     <xs:element minOccurs="0" name="packageDelivered" type="tns:package"/>
                     <xs:element name="price" type="xs:double"/>
@@ -78,6 +81,13 @@
                                 type="tns:delivery"/>
                     <xs:element name="id" type="xs:int"/>
                     <xs:element minOccurs="0" name="name" type="xs:string"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="drone">
+                <xs:sequence>
+                    <xs:element name="batteryLife" type="xs:int"/>
+                    <xs:element minOccurs="0" name="droneId" type="xs:string"/>
+                    <xs:element name="flightHours" type="xs:int"/>
                 </xs:sequence>
             </xs:complexType>
             <xs:complexType final="extension restriction" name="dateTime">
@@ -104,6 +114,9 @@
             <xs:complexType abstract="true" name="abstractInstant">
                 <xs:sequence/>
             </xs:complexType>
+            <xs:complexType name="droneStatus">
+                <xs:sequence/>
+            </xs:complexType>
             <xs:complexType name="findPackage">
                 <xs:sequence>
                     <xs:element minOccurs="0" name="secretNumber" type="xs:string"/>
@@ -125,6 +138,14 @@
             <xs:complexType name="registerPackageResponse">
                 <xs:sequence>
                     <xs:element minOccurs="0" name="return" type="xs:boolean"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="deleteAll">
+                <xs:sequence/>
+            </xs:complexType>
+            <xs:complexType name="deleteAllResponse">
+                <xs:sequence>
+                    <xs:element name="delete_all" type="xs:boolean"/>
                 </xs:sequence>
             </xs:complexType>
             <xs:element name="UnknownPackageException" type="tns:UnknownPackageException"/>
@@ -156,11 +177,17 @@
             </xsd:complexType>
         </xsd:schema>
     </wsdl:types>
+    <wsdl:message name="deleteAllResponse">
+        <wsdl:part element="tns:deleteAllResponse" name="parameters"></wsdl:part>
+    </wsdl:message>
     <wsdl:message name="registerPackageResponse">
         <wsdl:part element="tns:registerPackageResponse" name="parameters"></wsdl:part>
     </wsdl:message>
     <wsdl:message name="UnknownProviderException">
         <wsdl:part element="ns1:UnknownProviderException" name="UnknownProviderException"></wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="deleteAll">
+        <wsdl:part element="tns:deleteAll" name="parameters"></wsdl:part>
     </wsdl:message>
     <wsdl:message name="UnknownPackageException">
         <wsdl:part element="tns:UnknownPackageException" name="UnknownPackageException"></wsdl:part>
@@ -200,6 +227,10 @@
             <wsdl:fault message="tns:AlreadyExistingPackageException"
                         name="AlreadyExistingPackageException"></wsdl:fault>
             <wsdl:fault message="tns:UnknownProviderException" name="UnknownProviderException"></wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="deleteAll">
+            <wsdl:input message="tns:deleteAll" name="deleteAll"></wsdl:input>
+            <wsdl:output message="tns:deleteAllResponse" name="deleteAllResponse"></wsdl:output>
         </wsdl:operation>
     </wsdl:portType>
     <wsdl:binding name="PackageWebServiceServiceSoapBinding" type="tns:PackageRegisterWebService">
@@ -242,6 +273,15 @@
             <wsdl:fault name="UnknownProviderException">
                 <soap:fault name="UnknownProviderException" use="literal"/>
             </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="deleteAll">
+            <soap:operation soapAction="" style="document"/>
+            <wsdl:input name="deleteAll">
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output name="deleteAllResponse">
+                <soap:body use="literal"/>
+            </wsdl:output>
         </wsdl:operation>
     </wsdl:binding>
     <wsdl:service name="PackageWebServiceService">
