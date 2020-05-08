@@ -220,8 +220,6 @@ public class ScenarioCLI1Test {
 
 
 
-
-
         for (String s : exceptionList) {
             System.out.println("m " + s);
         }
