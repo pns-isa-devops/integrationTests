@@ -286,7 +286,7 @@
     </wsdl:binding>
     <wsdl:service name="PackageWebServiceService">
         <wsdl:port binding="tns:PackageWebServiceServiceSoapBinding" name="PackageWebServicePort">
-            <soap:address location="http://localhost:8080/PackageRegisterComponent/webservices/PackageWS"/>
+            <soap:address location="http://localhost:80/PackageRegisterComponent/webservices/PackageWS"/>
         </wsdl:port>
     </wsdl:service>
 </wsdl:definitions>

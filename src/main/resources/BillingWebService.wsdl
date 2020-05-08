@@ -267,7 +267,7 @@
     </wsdl:binding>
     <wsdl:service name="BillingWebServiceService">
         <wsdl:port binding="tns:BillingWebServiceServiceSoapBinding" name="BillingWebServicePort">
-            <soap:address location="http://localhost:8080/BillingComponent/webservices/BillingWS"/>
+            <soap:address location="http://localhost:80/BillingComponent/webservices/BillingWS"/>
         </wsdl:port>
     </wsdl:service>
 </wsdl:definitions>

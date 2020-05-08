@@ -258,7 +258,7 @@
     </wsdl:binding>
     <wsdl:service name="DeliveryWebServiceService">
         <wsdl:port name="DeliveryWebServicePort" binding="tns:DeliveryWebServiceServiceSoapBinding">
-            <soap:address location="http://localhost:8080/DeliveryComponent/webservices/DeliveryWS"/>
+            <soap:address location="http://localhost:80/DeliveryComponent/webservices/DeliveryWS"/>
         </wsdl:port>
     </wsdl:service>
 </wsdl:definitions>
