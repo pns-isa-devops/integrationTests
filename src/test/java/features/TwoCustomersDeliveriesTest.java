@@ -1,6 +1,6 @@
 package features;
 
-/*import arquillian.AbstractDroneDeliveryTest;
+import arquillian.AbstractDroneDeliveryTest;
 import cucumber.api.CucumberOptions;
 import cucumber.api.java.fr.Alors;
 import cucumber.api.java.fr.Et;
@@ -10,6 +10,7 @@ import fr.unice.polytech.isa.dd.*;
 import fr.unice.polytech.isa.dd.entities.Bill;
 import fr.unice.polytech.isa.dd.entities.Customer;
 import fr.unice.polytech.isa.dd.entities.Delivery;
+import fr.unice.polytech.isa.dd.entities.Package;
 import fr.unice.polytech.isa.dd.entities.Provider;
 import fr.unice.polytech.isa.dd.exceptions.*;
 import io.cucumber.java8.Fr;
@@ -19,6 +20,8 @@ import org.junit.runner.RunWith;
 import utils.MyDate;
 
 import javax.ejb.EJB;
+
+import java.text.ParseException;
 
 import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
@@ -39,6 +42,9 @@ public class TwoCustomersDeliveriesTest extends AbstractDroneDeliveryTest implem
     @EJB(name = "customer-stateless") private CustomerRegistration customerRegistration;
     @EJB(name = "customer-stateless") private CustomerFinder customerFinder;
     @EJB(name = "bill-stateless") private BillingGeneratedInterface billingGeneratedInterface;
+    @EJB(name = "drone-stateless") private DroneRegister droneRegister;
+    @EJB(name = "drone-stateless") private DroneStatusInterface droneStatusInterface;
+    @EJB(name = "drone-stateless") private AvailableDrone availableDrone;
 
     private Customer customer1 = new Customer();
     private Customer customer2 = new Customer();
@@ -46,6 +52,18 @@ public class TwoCustomersDeliveriesTest extends AbstractDroneDeliveryTest implem
     private String datedel ; private String hourdel; private String newDate;
     private boolean valid = false; private int colisNumber;
     private Delivery delivery; private double sum = 0;
+
+    @Quand("^un employé enregistre 3 colis d'id (.*) (.*) (.*)$")
+    public void enregistrementdrone(String arg0, String arg1, String arg2) throws ParseException {
+        droneRegister.register(arg0,"13/04/2020","10h00");
+        droneRegister.register(arg1,"13/04/2020","10h00");
+        droneRegister.register(arg2,"13/04/2020","10h00");
+    }
+    @Alors("^il y a (\\d+) drones libres$")
+    public void nombrededronelibres(int arg){
+        assertEquals(arg,droneRegister.allDrones().size());
+        assertEquals(arg,availableDrone.allDroneAvailable().size());
+    }
 
     @Quand("^Un employé enregistre un colis de numéro (\\d+) de (\\d+)kg d'un fournisseur du nom de (.*)$")
     public void engistrepremiercolis(int arg0, double arg1, String arg3) throws AlreadyExistingProviderException, UnknownProviderException, AlreadyExistingPackageException {
@@ -71,15 +89,19 @@ public class TwoCustomersDeliveriesTest extends AbstractDroneDeliveryTest implem
     @Quand("^un employé reçoit l'appel de madame (.*) (.*) résidant à l'adresse (.*)")
     public void appelpremierclient(String arg0, String arg1, String arg2) {
         customer1.setAddress(arg2);
-        customer1.setName(arg1+" "+arg0);
+        customer1.setName(arg0+" "+arg1);
     }
 
     @Et("^il vérifie si elle existe déjà dans le système et l'enregistre si ce n'est pas le cas$")
-    public void enregistreoupas() throws UnknownCustomerException, AlreadyExistingCustomerException {
-       Customer c =  customerFinder.findCustomerByName(customer1.getName());
+    public void enregistreoupas() throws AlreadyExistingCustomerException {
+        Customer c = null;
+        try {
+            c =  customerFinder.findCustomerByName(customer1.getName());
+        }catch (UnknownCustomerException ignored){
+        }
        assertNull(c);
        String [] names = customer1.getName().split(" ");
-       customerRegistration.registerCustomer(names[1],names[0],customer1.getAddress());
+       customerRegistration.registerCustomer(names[0],names[1],customer1.getAddress());
     }
 
     @Et("^à la demande du client enregistre une livraison le (.*) à (.*) pour le colis (\\d+)$")
@@ -94,14 +116,14 @@ public class TwoCustomersDeliveriesTest extends AbstractDroneDeliveryTest implem
         assertEquals(arg0.intValue(),deliverySchedule.get_deliveries().size());
     }
 
-    @Quand("^l'employé reçoit l'appel de madame (.*)")
+    @Quand("^l'employé reçoit l'appel de madame (.*)$")
     public void rec(String arg0) {
         nameCustomer = arg0.split(" ");
     }
 
     @Alors("^il remarque donc que cette dernière est dans le système$")
     public void existe() throws UnknownCustomerException {
-        customer1 = customerFinder.findCustomerByName(nameCustomer[1] +" " +nameCustomer[0]);
+        customer1 = customerFinder.findCustomerByName(nameCustomer[0] +" " +nameCustomer[1]);
         assertNotNull(customer1);
     }
 
@@ -132,15 +154,19 @@ public class TwoCustomersDeliveriesTest extends AbstractDroneDeliveryTest implem
     @Quand("^l'employé est contacté par madame (.*) (.*) résidant à l'adresse (.*)$")
     public void rec(String arg0,String arg1, String arg2) {
         customer2.setAddress(arg2);
-        customer2.setName(arg1+" "+arg0);
+        customer2.setName(arg0+" "+arg1);
     }
 
     @Alors("^il constate qu'elle n'est pas dans le système et donc l'enregistre$")
-    public void impo() throws UnknownCustomerException, AlreadyExistingCustomerException {
-        Customer c =  customerFinder.findCustomerByName(customer2.getName());
+    public void impo() throws AlreadyExistingCustomerException {
+        Customer c = null;
+        try {
+            c =  customerFinder.findCustomerByName(customer2.getName());
+        }catch (UnknownCustomerException ignored){
+        }
         assertNull(c);
         String [] names = customer2.getName().split(" ");
-        customerRegistration.registerCustomer(names[1],names[0],customer2.getAddress());
+        customerRegistration.registerCustomer(names[0],names[1],customer2.getAddress());
     }
 
     @Et("^cette dernière demande à être livrée le (.*) à (.*) pour le colis (\\d+)$")
@@ -152,8 +178,13 @@ public class TwoCustomersDeliveriesTest extends AbstractDroneDeliveryTest implem
     }
 
     @Alors("^l'employé lui dit que le colis (\\d+) n'existe pas$")
-    public void notin(int arg0) throws UnknownPackageException {
-        assertNull(packageFinder.findPackageBySecretNumber(String.valueOf(arg0)));
+    public void notin(int arg0){
+        Package aPackage = null;
+        try {
+            aPackage =  packageFinder.findPackageBySecretNumber(String.valueOf(arg0));
+        }catch (UnknownPackageException ignored){
+        }
+        assertNull(aPackage);
     }
 
     @Alors("^elle change le numéro du colis en (\\d+)$")
@@ -188,7 +219,7 @@ public class TwoCustomersDeliveriesTest extends AbstractDroneDeliveryTest implem
     public void rapp(String arg0,String arg1) throws UnknownCustomerException {
         MyDate.date_now = arg1;
         nameCustomer = arg0.split(" ");
-        customer1 = customerFinder.findCustomerByName(nameCustomer[1]+" " +nameCustomer[0]);
+        customer1 = customerFinder.findCustomerByName(nameCustomer[0]+" " +nameCustomer[1]);
     }
 
     @Alors("^elle donne la date du (.*) à (.*) de son colis (\\d+)$")
@@ -262,6 +293,6 @@ public class TwoCustomersDeliveriesTest extends AbstractDroneDeliveryTest implem
         billingGeneratedInterface.generateBill();
         Provider provider = providerFinder.findProviderByName(arg0);
         assertEquals(arg1,provider.getProvider_bills().size());
-        assertEquals(3  ,billingGeneratedInterface.get_bills().size());
+        assertEquals(1  ,billingGeneratedInterface.get_bills().size());
     }
-}*/
+}
