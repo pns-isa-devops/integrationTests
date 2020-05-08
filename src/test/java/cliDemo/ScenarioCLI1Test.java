@@ -223,6 +223,7 @@ public class ScenarioCLI1Test {
     }
 
     private static void initialize() {
+//        t
         String host = "localhost";
         String port = "8000";
         initCWS(host, port);
