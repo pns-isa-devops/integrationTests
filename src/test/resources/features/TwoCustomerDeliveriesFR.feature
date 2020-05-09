@@ -3,6 +3,10 @@
 Fonctionnalité: Drone Delivery
   Contexte: Le fonctionnement de l'entreprise
 
+  Scénario: L'entreprsie enregistre des drones
+    Quand un employé enregistre 3 colis d'id 1 2 3
+    Alors il y a 3 drones libres
+
   Scénario: L'entreprise enregistre des colis et des fournisseurs
     Quand Un employé enregistre un colis de numéro 200 de 5kg d'un fournisseur du nom de AUG
     Et un autre colis de numéro 600 de 3kg d'un fournisseur de nom PAU
