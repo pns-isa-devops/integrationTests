@@ -215,6 +215,62 @@ public class ScenarioCLI1Test {
         // Aucune exception ne doit se lever , la taille reste à 6
         assertEquals(6, exceptionList.size());
 
+        /*****************************************************************************************
+         *     ESSAYER DE RÉCUPÉRER LA PROCHAINE LIVRAISON  SANS ENREGISTREMENT AU PREALABLE     *
+         ****************************************************************************************/
+
+        System.out.println("TEST =====> Essayer de récupérer la prochaine libraison alors que la liste est vide");
+        try {
+            stubs.delivery.Delivery d = dews.getNextDelivery();
+            // Aucune livraispn nrégistrée dans la base
+            assertTrue(d == null);
+        } catch (ParseException_Exception e) {
+            e.printStackTrace();
+        }
+
+        /********************************************************
+         *     ENREGISTREMENT D'UNE PREMIÈRE LIVRAISON          *
+         ********************************************************/
+
+        System.out.println("TEST =====> Enregistrement d'une première livraison avec le colis 'X300' à la date 08/12/2020 et l'heure 12h00 ");
+        try {
+            String rep = plws.registerDelivery("koffi paul", "X300", "08/12/2020", "12h00");
+            // Enregistrement réussi
+            assertEquals(rep, "Livraison Programmé");
+        } catch (UnvailableSlotTimeException_Exception | PackageAlreadyTookException_Exception | stubs.planning.ParseException_Exception | UnknownCustomerException | UnknownPackageException e) {
+            exceptionList.add(e.getMessage());
+        }
+
+        /********************************************************
+         *  VERIFICATION DE L'ENREGISTREMENT DE LA LIVRAISON    *
+         ********************************************************/
+
+        System.out.println("TEST =====> Vérification de la livraison avec le colis 'X300' à la date 08/12/2020 et l'heure 12h00 ");
+        try {
+            Delivery p = dews.findDeliveryByDateAndHour("08/12/2020", "12h00");
+            assertEquals("X300", p.getPackageDelivered().getSecretNumber());
+            assertEquals(10.0, p.getPackageDelivered().getWeight(), DELTA);
+            assertEquals("08/12/2020 12h00", p.getPackageDelivered().getDeliveryDate());
+        } catch (Exception_Exception e) {
+            exceptionList.add(e.getMessage());
+        }
+        // Aucune exception ne doit se lever , la taille reste à 6
+        assertEquals(6, exceptionList.size());
+
+        /*****************************************************************************************
+         *     ESSAYER DE RÉCUPÉRER LA PROCHAINE LIVRAISON  SANS ENREGISTREMENT DE DRONE         *
+         ****************************************************************************************/
+
+        System.out.println("TEST =====> Essayer de récupérer la prochaine libraison alors qu'il n'ya pas de drones disponibles");
+
+
+
+
+
+
+
+
+
 
 
         for (String s : exceptionList) {
