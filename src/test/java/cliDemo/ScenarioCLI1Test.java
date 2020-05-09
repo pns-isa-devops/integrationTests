@@ -1,22 +1,24 @@
 package cliDemo;
 
 import api.DDPublicAPI;
+import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import stubs.billing.BillingWebService;
 import stubs.billing.BillingWebServiceService;
 import stubs.customer.*;
 import stubs.customer.Customer;
-import stubs.delivery.DeliveryWebService;
-import stubs.delivery.DeliveryWebServiceService;
+import stubs.delivery.*;
+import stubs.delivery.Delivery;
+import stubs.delivery.ParseException_Exception;
 import stubs.drone.DroneWebService;
 import stubs.drone.DroneWebServiceService;
 import stubs.packageR.AlreadyExistingPackageException_Exception;
 import stubs.packageR.PackageRegisterWebService;
 import stubs.packageR.PackageWebServiceService;
 import stubs.packageR.UnknownPackageException_Exception;
-import stubs.planning.PlanningWebService;
-import stubs.planning.PlanningWebServiceService;
+import stubs.planning.*;
+import stubs.planning.UnknownCustomerException;
 import stubs.provider.*;
 import stubs.provider.Provider;
 
@@ -37,6 +39,7 @@ public class ScenarioCLI1Test {
     private static PlanningWebService plws;
     private static DeliveryWebService dews;
     private static BillingWebService bws;
+    private static final double DELTA = 1e-15;
 
 
     @BeforeClass
@@ -209,7 +212,7 @@ public class ScenarioCLI1Test {
             stubs.packageR.Package pa2 = packws.findPackage("X310");
             assertEquals("ADIDAS", pa2.getProvider().getName());
             assertEquals("X310", pa2.getSecretNumber());
-        } catch (AlreadyExistingProviderException_Exception | UnknownProviderException_Exception | stubs.packageR.UnknownProviderException | AlreadyExistingPackageException_Exception | UnknownPackageException_Exception  e) {
+        } catch (AlreadyExistingProviderException_Exception | UnknownProviderException_Exception | stubs.packageR.UnknownProviderException | AlreadyExistingPackageException_Exception | UnknownPackageException_Exception e) {
             exceptionList.add(e.getMessage());
         }
         // Aucune exception ne doit se lever , la taille reste à 6
@@ -270,9 +273,6 @@ public class ScenarioCLI1Test {
 
 
 
-
-
-
         for (String s : exceptionList) {
             System.out.println("m " + s);
         }
@@ -281,6 +281,8 @@ public class ScenarioCLI1Test {
     private static void initialize() {
 
         String host = "jenkins-teamd.francecentral.cloudapp.azure.com";
+//        String host = "localhost";
+
         String port = "8000";
         initCWS(host, port);
         initPWS(host, port);
