@@ -21,9 +21,11 @@ import stubs.planning.*;
 import stubs.planning.UnknownCustomerException;
 import stubs.provider.*;
 import stubs.provider.Provider;
+import utils.MyDate;
 
 import javax.xml.ws.BindingProvider;
 import java.io.IOException;
+import java.lang.Exception;
 import java.lang.Package;
 import java.net.*;
 import java.util.ArrayList;
@@ -51,6 +53,7 @@ public class ScenarioCLI1Test {
     @Test
     public void testScenarioComplet() {
         ArrayList<String> exceptionList = new ArrayList<>();
+
 
         /*****************************************************
          *   PAS ENCORE  DE CLIENT "PAUL KOFFI" DANS LA BD   *
@@ -226,19 +229,19 @@ public class ScenarioCLI1Test {
         System.out.println("TEST =====> Essayer de récupérer la prochaine libraison alors que la liste est vide");
         try {
             stubs.delivery.Delivery d = dews.getNextDelivery();
-            // Aucune livraispn nrégistrée dans la base
-            assertTrue(d == null);
+            // Aucune livraispn erégistrée dans la base
+            assertNull(d);
         } catch (ParseException_Exception e) {
-            e.printStackTrace();
+            exceptionList.add(e.getMessage());
         }
 
         /********************************************************
          *     ENREGISTREMENT D'UNE PREMIÈRE LIVRAISON          *
          ********************************************************/
 
-        System.out.println("TEST =====> Enregistrement d'une première livraison avec le colis 'X300' à la date 08/12/2020 et l'heure 12h00 ");
+        System.out.println("TEST =====> Enregistrement d'une première livraison avec le colis 'X300' à la date " + MyDate.date_now + " et l'heure 12h00 ");
         try {
-            String rep = plws.registerDelivery("koffi paul", "X300", "08/12/2020", "12h00");
+            String rep = plws.registerDelivery("koffi paul", "X300", MyDate.date_now, "12h00");
             // Enregistrement réussi
             assertEquals(rep, "Livraison Programmé");
         } catch (UnvailableSlotTimeException_Exception | PackageAlreadyTookException_Exception | stubs.planning.ParseException_Exception | UnknownCustomerException | UnknownPackageException e) {
@@ -249,12 +252,12 @@ public class ScenarioCLI1Test {
          *  VERIFICATION DE L'ENREGISTREMENT DE LA LIVRAISON    *
          ********************************************************/
 
-        System.out.println("TEST =====> Vérification de la livraison avec le colis 'X300' à la date 08/12/2020 et l'heure 12h00 ");
+        System.out.println("TEST =====> Vérification de la livraison avec le colis 'X300' à la date " + MyDate.date_now + " et l'heure 12h00 ");
         try {
-            Delivery p = dews.findDeliveryByDateAndHour("08/12/2020", "12h00");
+            Delivery p = dews.findDeliveryByDateAndHour(MyDate.date_now, "12h00");
             assertEquals("X300", p.getPackageDelivered().getSecretNumber());
             assertEquals(10.0, p.getPackageDelivered().getWeight(), DELTA);
-            assertEquals("08/12/2020 12h00", p.getPackageDelivered().getDeliveryDate());
+            assertEquals(MyDate.date_now + " 12h00", p.getPackageDelivered().getDeliveryDate());
         } catch (Exception_Exception e) {
             exceptionList.add(e.getMessage());
         }
@@ -266,6 +269,49 @@ public class ScenarioCLI1Test {
          ****************************************************************************************/
 
         System.out.println("TEST =====> Essayer de récupérer la prochaine libraison alors qu'il n'ya pas de drones disponibles");
+        try {
+            stubs.delivery.Delivery d = dews.getNextDelivery();
+            // Aucun drone disponible dans la base
+            assertNull(d);
+            exceptionList.add("Aucun Drone disponible");
+        } catch (ParseException_Exception e) {
+            exceptionList.add(e.getMessage());
+        }
+        // Ajout du message drone indisponible si aucune livraison retourné , taille de la liste maintenant à 7
+        assertEquals(7, exceptionList.size());
+        assertEquals("Aucun Drone disponible", exceptionList.get(6));
+
+        /*****************************************************************************************
+         *                      ENREGISTRER UN DRONE AVEC LE NUM 'GD001'                         *
+         ****************************************************************************************/
+
+        System.out.println("TEST =====> Enrégistrer un drone avec le numéro 'GD001' ");
+        try {
+            Boolean rep = dws.register("GD001", MyDate.date_now, "12h00");
+            assertTrue(rep);
+        } catch (stubs.drone.ParseException_Exception e) {
+            exceptionList.add(e.getMessage());
+        }
+
+        /*****************************************************************************************
+         *       RÉCUPÉRER LA PROCHAINE LIVRAISON  MAINTENANT QU'IL Y'A DRONE MAINTENANT         *
+         ****************************************************************************************/
+
+        System.out.println("TEST =====> récupérer la prochaine libraison maintenant qu'il y'a le drone");
+        try {
+            stubs.delivery.Delivery d = dews.getNextDelivery();
+            // Drone disponible donc la livraispn va être récupérée
+            System.out.println("Obtenu " + d);
+            assertEquals("X300", d.getPackageDelivered().getSecretNumber());
+            assertEquals(10.0, d.getPackageDelivered().getWeight(), DELTA);
+            assertEquals(MyDate.date_now+ " 12h00", d.getPackageDelivered().getDeliveryDate());
+            // Le drone de la livraison doit être 'GD001'
+            assertEquals("GD001", d.getDrone().getDroneId());
+        } catch (ParseException_Exception e) {
+            exceptionList.add(e.getMessage());
+        }
+        // La taille de la liste reste à 7 car aucune exception ne doit se lever
+        assertEquals(7, exceptionList.size());
 
 
         for (String s : exceptionList) {
