@@ -227,7 +227,7 @@
     </wsdl:binding>
     <wsdl:service name="ProviderWebServiceService">
         <wsdl:port binding="tns:ProviderWebServiceServiceSoapBinding" name="ProviderWebServicePort">
-            <soap:address location="http://localhost:8080/ProviderRegisterComponent/webservices/ProviderWS"/>
+            <soap:address location="http://localhost:8000/ProviderRegisterComponent/webservices/ProviderWS"/>
         </wsdl:port>
     </wsdl:service>
 </wsdl:definitions>
