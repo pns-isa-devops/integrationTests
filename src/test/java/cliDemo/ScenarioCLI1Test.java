@@ -223,7 +223,7 @@ public class ScenarioCLI1Test {
     }
 
     private static void initialize() {
-//        t
+
         String host = "jenkins-teamd.francecentral.cloudapp.azure.com";
         String port = "8000";
         initCWS(host, port);
