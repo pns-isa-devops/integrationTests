@@ -229,7 +229,7 @@
     </wsdl:binding>
     <wsdl:service name="CustomerWebServiceService">
         <wsdl:port binding="tns:CustomerWebServiceServiceSoapBinding" name="CustomerWebServicePort">
-            <soap:address location="http://localhost:8000/CustomerRegisterComponent/webservices/CustomerWS"/>
+            <soap:address location="http://localhost:8080/CustomerRegisterComponent/webservices/CustomerWS"/>
         </wsdl:port>
     </wsdl:service>
 </wsdl:definitions>

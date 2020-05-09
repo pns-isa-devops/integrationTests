@@ -225,7 +225,7 @@ public class ScenarioCLI1Test {
     private static void initialize() {
 //        t
         String host = "localhost";
-        String port = "8000";
+        String port = "8080";
         initCWS(host, port);
         initPWS(host, port);
         initPackWS(host, port);
