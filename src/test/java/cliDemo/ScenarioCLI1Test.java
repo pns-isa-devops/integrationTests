@@ -23,8 +23,9 @@ import stubs.provider.*;
 import stubs.provider.Provider;
 
 import javax.xml.ws.BindingProvider;
+import java.io.IOException;
 import java.lang.Package;
-import java.net.URL;
+import java.net.*;
 import java.util.ArrayList;
 
 import static org.junit.Assert.*;
@@ -267,12 +268,6 @@ public class ScenarioCLI1Test {
         System.out.println("TEST =====> Essayer de récupérer la prochaine libraison alors qu'il n'ya pas de drones disponibles");
 
 
-
-
-
-
-
-
         for (String s : exceptionList) {
             System.out.println("m " + s);
         }
@@ -281,7 +276,18 @@ public class ScenarioCLI1Test {
     private static void initialize() {
 
         String host = "jenkins-teamd.francecentral.cloudapp.azure.com";
-//        String host = "localhost";
+//        ### Vérifier que serveur jenkins UP sinon utiliser localhost
+        try {
+            URL url = new URL("http://jenkins-teamd.francecentral.cloudapp.azure.com:8000/Web/webservices/BillingWS?wsdl");
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.connect();
+            int respCode = connection.getResponseCode();
+            System.out.println("=====> Jenkins Server J2e UP");
+        } catch (IOException e) {
+            System.out.println("=====> Jenkins Server J2e DOWN");
+            host = "localhost";
+        }
 
         String port = "8000";
         initCWS(host, port);
