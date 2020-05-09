@@ -260,5 +260,8 @@
         <wsdl:port name="DeliveryWebServicePort" binding="tns:DeliveryWebServiceServiceSoapBinding">
             <soap:address location="http://localhost:8000/DeliveryComponent/webservices/DeliveryWS"/>
         </wsdl:port>
+        <wsdl:port name="DeliveryWebServicePort" binding="tns:DeliveryWebServiceServiceSoapBinding">
+            <soap:address location="http://jenkins-teamd.francecentral.cloudapp.azure.com:8000/DeliveryComponent/webservices/DeliveryWS"/>
+        </wsdl:port>
     </wsdl:service>
 </wsdl:definitions>

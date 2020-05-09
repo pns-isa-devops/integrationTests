@@ -231,5 +231,8 @@
         <wsdl:port binding="tns:CustomerWebServiceServiceSoapBinding" name="CustomerWebServicePort">
             <soap:address location="http://localhost:8000/CustomerRegisterComponent/webservices/CustomerWS"/>
         </wsdl:port>
+        <wsdl:port binding="tns:CustomerWebServiceServiceSoapBinding" name="CustomerWebServicePort">
+            <soap:address location="http://jenkins-teamd.francecentral.cloudapp.azure.com:8000/CustomerRegisterComponent/webservices/CustomerWS"/>
+        </wsdl:port>
     </wsdl:service>
 </wsdl:definitions>
