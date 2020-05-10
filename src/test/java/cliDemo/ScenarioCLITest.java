@@ -540,6 +540,7 @@ public class ScenarioCLITest {
         System.out.println();
 
 
+
         /******************************************************************
          *                AFFICHAGE DE TOUTES LES EXCEPTIONS              *
          *****************************************************************/
