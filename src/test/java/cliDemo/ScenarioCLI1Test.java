@@ -122,7 +122,7 @@ public class ScenarioCLI1Test {
          *  ESSAYER D'ENREGISTRER LE PROVIDER "AMAZON" QUI EXISTE DEJA DANS LA BD    *
          ****************************************************************************/
 
-        System.out.println("TEST =====> Enregistrement d'un provider AMAZON qui existe déja");
+        System.out.println("TEST =====> L'Enregistrement d'un provider AMAZON qui existe déja dans la BD échoue");
         try {
             Boolean rep = pws.register("AMAZON");
             //            Enregistrement reussi
@@ -151,7 +151,7 @@ public class ScenarioCLI1Test {
          *  ENREGISTREMENT DU COLIS AVEC UN PROVIDER INEXISTANT *
          *******************************************************/
 
-        System.out.println("TEST =====> Enregistrement d'un colis avec le numéro 'X426' et le provider 'GOOGLE' inexistant ");
+        System.out.println("TEST =====> Enregistrement d'un colis avec le numéro 'X426' et le provider 'GOOGLE' inexistant échoue");
         try {
             Boolean rep = packws.registerPackage("X426", 50.0, "08/05/2020 15h00", "GOOGLE");
         } catch (stubs.packageR.UnknownProviderException | AlreadyExistingPackageException_Exception e) {
@@ -184,7 +184,7 @@ public class ScenarioCLI1Test {
          *         ESSAYER D'ENREGISTRER UN COLIS EXISTANT      *
          *******************************************************/
 
-        System.out.println("TEST =====> Enregistrement d'un colis avec le numéro 'X426' qui existe déja ");
+        System.out.println("TEST =====> Enregistrement d'un colis avec le numéro 'X426' qui existe déja échoue");
         try {
             Boolean rep = packws.registerPackage("X426", 50.0, "08/05/2020 15h00", "AMAZON");
         } catch (stubs.packageR.UnknownProviderException | AlreadyExistingPackageException_Exception e) {
@@ -226,7 +226,7 @@ public class ScenarioCLI1Test {
          *     ESSAYER DE RÉCUPÉRER LA PROCHAINE LIVRAISON  SANS ENREGISTREMENT AU PREALABLE     *
          ****************************************************************************************/
 
-        System.out.println("TEST =====> Essayer de récupérer la prochaine libraison alors que la liste est vide");
+        System.out.println("TEST =====> Essayer de récupérer la prochaine libraison alors que la liste est vide : Retourne NULL");
         try {
             stubs.delivery.Delivery d = dews.getNextDelivery();
             // Aucune livraispn erégistrée dans la base
@@ -264,11 +264,27 @@ public class ScenarioCLI1Test {
         // Aucune exception ne doit se lever , la taille reste à 6
         assertEquals(6, exceptionList.size());
 
+        /*************************************************************************************
+         *    ESSAI D'ENREGISTREMENT D'UNE SECONDE LIVRAISON  À UN HORAIRE INDISPONIBLE       *
+         *************************************************************************************/
+
+        System.out.println("TEST =====> Essai d'enregistrement d'une autre livraison à la date " + MyDate.date_now + " et à l'heure 12h30 indisponible échoue");
+        try {
+            String rep = plws.registerDelivery("koffi paul", "X426", MyDate.date_now, "12h30");
+        } catch (UnvailableSlotTimeException_Exception | PackageAlreadyTookException_Exception | stubs.planning.ParseException_Exception | UnknownCustomerException | UnknownPackageException e) {
+            exceptionList.add(e.getMessage());
+        }
+        // Dans notre système une livraison enrégistré à une heure donnée bloque aussi la tranche horaire pour les 1h30 prochaines minutes
+        // Donc une exception doit être levée , nouvelle taille de la liste à 7
+        assertEquals(7, exceptionList.size());
+        assertEquals("Le slot de : " + MyDate.date_now + " - 12h30 est indisponible", exceptionList.get(6));
+
+
         /*****************************************************************************************
          *     ESSAYER DE RÉCUPÉRER LA PROCHAINE LIVRAISON  SANS ENREGISTREMENT DE DRONE         *
          ****************************************************************************************/
 
-        System.out.println("TEST =====> Essayer de récupérer la prochaine libraison alors qu'il n'ya pas de drones disponibles");
+        System.out.println("TEST =====> Essayer de récupérer la prochaine libraison alors qu'il n'ya pas de drones disponibles : retourne NULL");
         try {
             stubs.delivery.Delivery d = dews.getNextDelivery();
             // Aucun drone disponible dans la base
@@ -277,9 +293,9 @@ public class ScenarioCLI1Test {
         } catch (ParseException_Exception e) {
             exceptionList.add(e.getMessage());
         }
-        // Ajout du message drone indisponible si aucune livraison retourné , taille de la liste maintenant à 7
-        assertEquals(7, exceptionList.size());
-        assertEquals("Aucun Drone disponible", exceptionList.get(6));
+        // Ajout du message drone indisponible si aucune livraison retourné , taille de la liste maintenant à 8
+        assertEquals(8, exceptionList.size());
+        assertEquals("Aucun Drone disponible", exceptionList.get(7));
 
         /*****************************************************************************************
          *                      ENREGISTRER UN DRONE AVEC LE NUM 'GD001'                         *
@@ -294,7 +310,7 @@ public class ScenarioCLI1Test {
         }
 
         /*****************************************************************************************
-         *       RÉCUPÉRER LA PROCHAINE LIVRAISON  MAINTENANT QU'IL Y'A DRONE MAINTENANT         *
+         *       RÉCUPÉRER LA PROCHAINE LIVRAISON  MAINTENANT QU'IL Y'A UN DRONE                  *
          ****************************************************************************************/
 
         System.out.println("TEST =====> récupérer la prochaine libraison maintenant qu'il y'a le drone");
@@ -304,14 +320,60 @@ public class ScenarioCLI1Test {
             System.out.println("Obtenu " + d);
             assertEquals("X300", d.getPackageDelivered().getSecretNumber());
             assertEquals(10.0, d.getPackageDelivered().getWeight(), DELTA);
-            assertEquals(MyDate.date_now+ " 12h00", d.getPackageDelivered().getDeliveryDate());
+            assertEquals(MyDate.date_now + " 12h00", d.getPackageDelivered().getDeliveryDate());
             // Le drone de la livraison doit être 'GD001'
             assertEquals("GD001", d.getDrone().getDroneId());
         } catch (ParseException_Exception e) {
             exceptionList.add(e.getMessage());
         }
-        // La taille de la liste reste à 7 car aucune exception ne doit se lever
-        assertEquals(7, exceptionList.size());
+        // La taille de la liste reste à 8 car aucune exception ne doit se lever
+        assertEquals(8, exceptionList.size());
+
+        /******************************************************************
+         *         ENREGISTREMENT DE DEUX AUTRES LIVRAISONS               *
+         *****************************************************************/
+
+        System.out.println("TEST =====> Enregistrement de 2 autres livraisons à la date '08/05/2020' ");
+        try {
+            String rep = plws.registerDelivery("koffi paul", "X426","08/05/2020", "15h30");
+            String rep1 = plws.registerDelivery("koffi paul", "X310", "08/05/2020", "18h30");
+            assertEquals(rep, "Livraison Programmé");
+            assertEquals(rep1, "Livraison Programmé");
+        } catch (UnvailableSlotTimeException_Exception | PackageAlreadyTookException_Exception | stubs.planning.ParseException_Exception | UnknownCustomerException | UnknownPackageException e) {
+            exceptionList.add(e.getMessage());
+        }
+
+        /*****************************************************************************************
+         *                            ENREGISTRER 2 AUTRES DRONES                                *
+         ****************************************************************************************/
+
+        System.out.println("TEST =====> Enrégistrer 2 droneS avec les numéro 'GD002' et 'GD003' ");
+        try {
+            Boolean rep = dws.register("GD002", MyDate.date_now, "12h00");
+            Boolean rep1 = dws.register("GD003", MyDate.date_now, "12h00");
+            assertTrue(rep);
+            assertTrue(rep1);
+        } catch (stubs.drone.ParseException_Exception e) {
+            exceptionList.add(e.getMessage());
+        }
+
+        /*****************************************************************************************
+         *                 RÉCUPÉRER LA PROCHAINE LIVRAISON  MAINTENANT                          *
+         ****************************************************************************************/
+
+        System.out.println("TEST =====> La récupération de la prochaine livraison ne marche pas car les 2 livraisons précédentes ne sont pas enrégistrées avc la date du Jour");
+        try {
+            stubs.delivery.Delivery d = dews.getNextDelivery();
+            assertNull(d);
+        } catch (ParseException_Exception e) {
+            exceptionList.add(e.getMessage());
+        }
+        // La taille de la liste reste à 8 car aucune exception ne doit se lever
+        assertEquals(8, exceptionList.size());
+
+
+
+
 
 
         for (String s : exceptionList) {
