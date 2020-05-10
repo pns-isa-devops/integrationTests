@@ -4,6 +4,7 @@ import api.DDPublicAPI;
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import stubs.billing.Bill;
 import stubs.billing.BillingWebService;
 import stubs.billing.BillingWebServiceService;
 import stubs.customer.*;
@@ -188,6 +189,8 @@ public class ScenarioCLITest {
             stubs.packageR.Package p = packws.findPackage("X426");
             assertEquals("AMAZON", p.getProvider().getName());
             assertEquals("X426", p.getSecretNumber());
+            System.out.println("TEST =====> Enregistrement du colis 'X426' pour 'AMAZON' \n");
+
         } catch (stubs.packageR.UnknownProviderException | AlreadyExistingPackageException_Exception | UnknownPackageException_Exception e) {
             exceptionList.add(e.getMessage());
         }
@@ -223,18 +226,23 @@ public class ScenarioCLITest {
             assertTrue(rep);
             Provider p = pws.findProvider("ADIDAS");
             assertEquals("ADIDAS", p.getName());
+            System.out.println("TEST =====> Enregistrement du provider 'ADIDAS' \n");
+
 
             rep = packws.registerPackage("X300", 20.0, "08/05/2020 15h00", "AMAZON");
             assertTrue(rep);
             stubs.packageR.Package pa = packws.findPackage("X300");
             assertEquals("AMAZON", pa.getProvider().getName());
             assertEquals("X300", pa.getSecretNumber());
+            System.out.println("TEST =====> Enregistrement du colis 'X300' pour 'AMAZON' \n");
+
 
             rep = packws.registerPackage("X310", 5.0, "08/05/2020 15h00", "ADIDAS");
             assertTrue(rep);
             stubs.packageR.Package pa2 = packws.findPackage("X310");
             assertEquals("ADIDAS", pa2.getProvider().getName());
             assertEquals("X310", pa2.getSecretNumber());
+            System.out.println("TEST =====> Enregistrement du colis 'X310' pour 'ADIDAS' \n");
         } catch (AlreadyExistingProviderException_Exception | UnknownProviderException_Exception | stubs.packageR.UnknownProviderException | AlreadyExistingPackageException_Exception | UnknownPackageException_Exception e) {
             exceptionList.add(e.getMessage());
         }
@@ -341,7 +349,7 @@ public class ScenarioCLITest {
         }
 
         /*****************************************************************************************
-         *       RÉCUPÉRER LA PROCHAINE LIVRAISON  MAINTENANT QU'IL Y'A UN DRONE                  *
+         *       RÉCUPÉRER LA PROCHAINE LIVRAISON  MAINTENANT QU'IL Y'A UN DRONE                 *
          ****************************************************************************************/
 
         System.out.println("TEST =====> récupérer la prochaine libraison maintenant qu'il y'a le drone");
@@ -475,7 +483,7 @@ public class ScenarioCLITest {
         }
 
         /*****************************************************************************************
-         *                  RÉUPERER LA PROCHAINE LIVRAISON DE LA JOURNÉE                        *
+         *                  RÉCUPERER LA PROCHAINE LIVRAISON DE LA JOURNÉE                       *
          ****************************************************************************************/
 
         System.out.println("TEST =====> La récupération de la prochaine livraison de la journée nous retourne la dernière qui a comme provider ADIDAS et utilise le seul drone disponible 'GD003' ");
@@ -499,6 +507,37 @@ public class ScenarioCLITest {
         assertEquals(8, exceptionList.size());
 
 
+        /*****************************************************************************************
+         *                        GÉNERER LES FACTURES À LA FIN DE LA JOURNÉE                    *
+         ****************************************************************************************/
+
+        System.out.println("TEST =====> Géneration des factures à la fin de la journée ");
+        System.out.println();
+        boolean response = bws.generateBill();
+        assertTrue(response);
+
+        /*****************************************************************************************
+         *                        CONSULTATION DES FACTURES GENERÉES                             *
+         ****************************************************************************************/
+
+        System.out.println("TEST =====> Consultation des factures génerées à la fin de la journée ");
+        System.out.println();
+        List<Bill> lB = bws.getBills();
+        assertEquals(2, lB.size());
+        System.out.println("TEST =====> On trouve bien 2 factures car on a 2 providers 'AMAZON' et 'GOOGLE' ");
+        System.out.println();
+        assertEquals(lB.get(0).getProvider().getName(), "ADIDAS");
+        System.out.println("TEST =====> La première facture est celle de 'ADIDAS' ");
+        System.out.println();
+        assertEquals(50.0, lB.get(0).getBillAmount(), DELTA);
+        System.out.println("TEST =====> On a effectuer la livraison d'un seul colis de 'ADIDAS' qui pèse 5 Kilos donc prix de la facture au final ===> 50");
+        System.out.println();
+        assertEquals(lB.get(1).getProvider().getName(), "AMAZON");
+        System.out.println("TEST =====> La seconde facture est celle d'AMAZON' ");
+        System.out.println();
+        assertEquals(700.0, lB.get(1).getBillAmount(), DELTA);
+        System.out.println("TEST =====> On a effectuer la livraison de 2 colis pour 'AMAZON' qui pèse 50 et 20 Kilos donc prix de la facture au final ===> 700");
+        System.out.println();
 
 
         /******************************************************************
