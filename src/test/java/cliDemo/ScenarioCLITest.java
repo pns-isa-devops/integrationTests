@@ -7,6 +7,7 @@ import org.junit.Test;
 import stubs.billing.Bill;
 import stubs.billing.BillingWebService;
 import stubs.billing.BillingWebServiceService;
+import stubs.billing.ExternalPartnerException_Exception;
 import stubs.customer.*;
 import stubs.customer.Customer;
 import stubs.delivery.*;
@@ -535,11 +536,28 @@ public class ScenarioCLITest {
         assertEquals(lB.get(1).getProvider().getName(), "AMAZON");
         System.out.println("TEST =====> La seconde facture est celle d'AMAZON' ");
         System.out.println();
+
         assertEquals(700.0, lB.get(1).getBillAmount(), DELTA);
         System.out.println("TEST =====> On a effectuer la livraison de 2 colis pour 'AMAZON' qui pèse 50 et 20 Kilos donc prix de la facture au final ===> 700");
         System.out.println();
 
+        /*****************************************************************************************
+         *                     VERIFIER LA LISTE DES FACTURES PAYÉES                             *
+         ****************************************************************************************/
 
+        System.out.println("TEST =====> Consultation de la liste des factures payées [S'adresse au service externe]");
+        System.out.println();
+        try {
+            List<Bill> paidBills = bws.getAllPaidBills();
+            assertEquals(1,paidBills.size());
+            System.out.println("TEST =====> On trouve une seule facture payée !");
+            System.out.println();
+            assertEquals(paidBills.get(0).getProvider().getName(), "ADIDAS");
+            System.out.println("TEST =====> C'est la facture du fournisseur 'ADIDAS' qui a comme Num '1' car sur le service externe seuls les factures qui ont comme Num '1' et '3' sont présentes dans la liste des factures payées");
+            System.out.println();
+        } catch (ExternalPartnerException_Exception e) {
+            exceptionList.add(e.getMessage());
+        }
 
         /******************************************************************
          *                AFFICHAGE DE TOUTES LES EXCEPTIONS              *
