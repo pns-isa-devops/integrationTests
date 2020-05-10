@@ -572,6 +572,7 @@ public class ScenarioCLITest {
 
         System.out.println();
         System.out.println("TEST =====> Fin du Test");
+        System.out.println();
     }
 
     private static void initialize() {
