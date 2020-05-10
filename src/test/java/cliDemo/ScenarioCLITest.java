@@ -48,6 +48,8 @@ public class ScenarioCLITest {
     private static final double DELTA = 1e-15;
 
 
+
+
     @BeforeClass
     public static void init() {
         initialize();
