@@ -26,7 +26,9 @@ import stubs.provider.Provider;
 import utils.MyDate;
 
 import javax.xml.ws.BindingProvider;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.Exception;
 import java.lang.Package;
 import java.net.*;
@@ -48,15 +50,14 @@ public class ScenarioCLITest {
     private static final double DELTA = 1e-15;
 
 
-
-
     @BeforeClass
     public static void init() {
-        initialize();
+
     }
 
     @Test
     public void testScenarioComplet() {
+        initialize();
         ArrayList<String> exceptionList = new ArrayList<>();
 
 
@@ -551,7 +552,7 @@ public class ScenarioCLITest {
         System.out.println();
         try {
             List<Bill> paidBills = bws.getAllPaidBills();
-            assertEquals(1,paidBills.size());
+            assertEquals(1, paidBills.size());
             System.out.println("TEST =====> On trouve une seule facture payée !");
             System.out.println();
             assertEquals(paidBills.get(0).getProvider().getName(), "ADIDAS");
@@ -592,8 +593,40 @@ public class ScenarioCLITest {
             System.out.println("=====> Jenkins Server J2e UP");
         } catch (IOException e) {
             System.out.println("=====> Jenkins Server J2e DOWN");
+//            host = "192.168.99.100";
             host = "localhost";
+
         }
+
+
+//        try {
+////            URL url = new URL("http://192.168.99.100:9090/payments");
+//            //            URL url = new URL("http://localhost:9090/payments");
+//
+//            URL url = new URL("http://jenkins-teamd.francecentral.cloudapp.azure.com:9090/payments");
+//
+//            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+//            connection.setRequestMethod("GET");
+//            connection.connect();
+//            int respCode = connection.getResponseCode();
+//            System.out.println("=====> Jenkins Server Extern UP");
+//            System.out.println(respCode);
+//            System.out.println("Resp " + connection.getContent());
+//            System.out.println();
+//
+//            BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+//            StringBuilder sb = new StringBuilder();
+//            String line;
+//            while ((line = br.readLine()) != null) {
+//                sb.append(line+"\n");
+//            }
+//            br.close();
+//            System.out.println("Resp "+sb.toString());
+//        } catch (IOException e) {
+//            System.out.println("=====> Jenkins Server Extern DOWN");
+//            System.out.println();
+//        }
+
 
         String port = "8000";
         initCWS(host, port);
